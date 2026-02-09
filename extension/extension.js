@@ -37,9 +37,12 @@ function createWindowWidgets() {
     track.add_child(fill);
 
     track.connect('notify::allocation', () => {
-        const trackWidth = track.get_width();
-        if (trackWidth > 0)
-            fill.set_width(Math.round(trackWidth * fill._remainingPct / 100));
+        const node = track.get_theme_node();
+        if (!node) return;
+        const contentBox = node.get_content_box(track.get_allocation_box());
+        const contentWidth = contentBox.x2 - contentBox.x1;
+        if (contentWidth > 0)
+            fill.set_width(Math.round(contentWidth * fill._remainingPct / 100));
     });
 
     const infoRow = new St.BoxLayout({style_class: 'usage-info-row'});
@@ -243,9 +246,13 @@ class UsageIndicator extends PanelMenu.Button {
                 widgets.remainingLabel.text = w.remainingText;
                 widgets.resetsLabel.text = w.resetsInText;
 
-                const trackWidth = widgets.track.get_width();
-                if (trackWidth > 0)
-                    widgets.fill.set_width(Math.round(trackWidth * w.remainingPct / 100));
+                const node = widgets.track.get_theme_node();
+                if (node) {
+                    const contentBox = node.get_content_box(widgets.track.get_allocation_box());
+                    const contentWidth = contentBox.x2 - contentBox.x1;
+                    if (contentWidth > 0)
+                        widgets.fill.set_width(Math.round(contentWidth * w.remainingPct / 100));
+                }
             }
 
             if (svc.warning) {
