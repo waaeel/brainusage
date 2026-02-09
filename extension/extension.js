@@ -33,7 +33,14 @@ function createWindowWidgets() {
     const track = new St.BoxLayout({style_class: 'usage-progress-track'});
     track.set_x_expand(true);
     const fill = new St.Widget({style_class: 'usage-fill-green'});
+    fill._remainingPct = 0;
     track.add_child(fill);
+
+    track.connect('notify::allocation', () => {
+        const trackWidth = track.get_width();
+        if (trackWidth > 0)
+            fill.set_width(Math.round(trackWidth * fill._remainingPct / 100));
+    });
 
     const infoRow = new St.BoxLayout({style_class: 'usage-info-row'});
     infoRow.set_x_expand(true);
@@ -232,6 +239,7 @@ class UsageIndicator extends PanelMenu.Button {
 
                 widgets.label.text = w.label;
                 widgets.fill.style_class = FILL_CLASSES[w.dotColor] ?? 'usage-fill-red';
+                widgets.fill._remainingPct = w.remainingPct;
                 widgets.remainingLabel.text = w.remainingText;
                 widgets.resetsLabel.text = w.resetsInText;
 
