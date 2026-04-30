@@ -99,6 +99,43 @@ describe('buildUsageViewModel', () => {
         expect(claude.warning).toBe('');
     });
 
+    test('panelLabelMode expanded spells out session and week', () => {
+        const view = buildUsageViewModel({
+            providers: {
+                claude: {
+                    code: 'OK',
+                    data: {
+                        sessionRemainingPct: 60,
+                        weeklyRemainingPct: 25,
+                        sessionUsedPct: 40,
+                        weeklyUsedPct: 75,
+                    },
+                },
+                codex: {
+                    code: 'OK',
+                    data: {
+                        sessionRemainingPct: 73,
+                        weeklyRemainingPct: 91,
+                        sessionUsedPct: 27,
+                        weeklyUsedPct: 9,
+                    },
+                },
+            },
+        }, {now: NOW, panelLabelMode: 'expanded'});
+
+        expect(view.panelLabelMode).toBe('expanded');
+        expect(view.panelGroups).toEqual([
+            makePanelGroup('codex', 'Codex', [
+                {key: 'codex-session', label: 'Session', percentText: '73%'},
+                {key: 'codex-weekly', label: 'Week', percentText: '91%'},
+            ]),
+            makePanelGroup('claude', 'Claude', [
+                {key: 'claude-session', label: 'Session', percentText: '60%'},
+                {key: 'claude-weekly', label: 'Week', percentText: '25%'},
+            ]),
+        ]);
+    });
+
     test('shows warning messages for error states', () => {
         const view = buildUsageViewModel({
             providers: {

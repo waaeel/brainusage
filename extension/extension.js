@@ -18,6 +18,7 @@ import {createFetch} from './lib/runtime/fetch.js';
 import {
     buildUsageViewModel,
     PANEL_DISPLAY_MODES,
+    PANEL_LABEL_MODES,
     PANEL_PERCENT_MODES,
 } from './lib/ui/render.js';
 
@@ -224,6 +225,7 @@ class UsageIndicator extends PanelMenu.Button {
         this._lastSummary = null;
         this._timerSourceId = 0;
         this._displayModeItems = [];
+        this._labelModeItems = [];
         this._percentModeItems = [];
         this._settingsChangedIds = [];
 
@@ -252,6 +254,7 @@ class UsageIndicator extends PanelMenu.Button {
         this._settingsChangedIds = [
             this._settings.connect('changed::panel-display-modes', onSettingsChanged),
             this._settings.connect('changed::panel-percent-mode', onSettingsChanged),
+            this._settings.connect('changed::panel-label-mode', onSettingsChanged),
         ];
     }
 
@@ -301,6 +304,7 @@ class UsageIndicator extends PanelMenu.Button {
         this.menu.addMenuItem(refreshItem);
 
         this._buildDisplaySection();
+        this._buildLabelSubmenu();
         this._buildPercentSubmenu();
     }
 
@@ -326,6 +330,7 @@ class UsageIndicator extends PanelMenu.Button {
 
     _updateOrnaments() {
         this._updateDisplayOrnaments();
+        this._updateLabelModeOrnaments();
         this._updatePercentModeOrnaments();
     }
 
@@ -354,6 +359,35 @@ class UsageIndicator extends PanelMenu.Button {
 
         const next = PANEL_DISPLAY_MODES.filter((key) => current.has(key));
         this._settings.set_strv('panel-display-modes', next);
+    }
+
+    _buildLabelSubmenu() {
+        this._labelSubmenu = new PopupMenu.PopupSubMenuMenuItem('Label style');
+        this._labelModeItems = [];
+
+        for (const mode of PANEL_LABEL_MODES) {
+            const item = new PopupMenu.PopupMenuItem(mode === 'expanded' ? 'Expanded' : 'Compact');
+            item._labelModeKey = mode;
+            item.connect('activate', () => {
+                this._settings.set_string('panel-label-mode', mode);
+            });
+            this._labelModeItems.push(item);
+            this._labelSubmenu.menu.addMenuItem(item);
+        }
+
+        this._updateLabelModeOrnaments();
+        this.menu.addMenuItem(this._labelSubmenu);
+    }
+
+    _updateLabelModeOrnaments() {
+        const current = this._settings.get_string('panel-label-mode');
+        for (const item of this._labelModeItems) {
+            item.setOrnament(
+                item._labelModeKey === current
+                    ? PopupMenu.Ornament.DOT
+                    : PopupMenu.Ornament.NONE,
+            );
+        }
     }
 
     _buildPercentSubmenu() {
@@ -405,6 +439,7 @@ class UsageIndicator extends PanelMenu.Button {
             pollIntervalMs: DEFAULT_POLL_INTERVAL_MS,
             panelDisplayModes: this._getPanelDisplayModes(),
             panelPercentMode: this._settings.get_string('panel-percent-mode'),
+            panelLabelMode: this._settings.get_string('panel-label-mode'),
         }));
     }
 
@@ -415,6 +450,7 @@ class UsageIndicator extends PanelMenu.Button {
             pollIntervalMs: DEFAULT_POLL_INTERVAL_MS,
             panelDisplayModes: this._getPanelDisplayModes(),
             panelPercentMode: this._settings.get_string('panel-percent-mode'),
+            panelLabelMode: this._settings.get_string('panel-label-mode'),
         }));
     }
 

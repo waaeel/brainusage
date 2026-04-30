@@ -50,6 +50,7 @@ const PANEL_MODE_CONFIG_MAP = new Map(
 export const PANEL_DISPLAY_MODES = PANEL_MODE_CONFIG.map((config) => config.key);
 export const DEFAULT_PANEL_DISPLAY_MODES = [...PANEL_DISPLAY_MODES];
 export const PANEL_PERCENT_MODES = ['left', 'used'];
+export const PANEL_LABEL_MODES = ['compact', 'expanded'];
 
 function getPanelMetricFromConfig(summary, config, percentMode) {
     const data = summary?.providers?.[config.providerKey]?.data;
@@ -80,7 +81,7 @@ function normalizePanelDisplayModes(modes) {
     return modes.length === 0 ? [] : validModes;
 }
 
-function buildPanelGroupViewModels(summary, panelDisplayModes, panelPercentMode) {
+function buildPanelGroupViewModels(summary, panelDisplayModes, panelPercentMode, panelLabelMode) {
     if (!summary)
         return [];
 
@@ -107,7 +108,7 @@ function buildPanelGroupViewModels(summary, panelDisplayModes, panelPercentMode)
 
         group.items.push({
             key: metric.key,
-            label: metric.windowShortLabel,
+            label: panelLabelMode === 'expanded' ? metric.serviceLabel : metric.windowShortLabel,
             percentText: metric.percentText,
         });
     }
@@ -256,13 +257,15 @@ export function buildUsageViewModel(summary, deps = {}) {
     const pollIntervalMs = deps.pollIntervalMs ?? 180_000;
     const panelDisplayModes = deps.panelDisplayModes ?? DEFAULT_PANEL_DISPLAY_MODES;
     const panelPercentMode = deps.panelPercentMode === 'used' ? 'used' : 'left';
+    const panelLabelMode = deps.panelLabelMode === 'expanded' ? 'expanded' : 'compact';
 
     const claude = summary?.providers?.claude ?? null;
     const codex = summary?.providers?.codex ?? null;
 
     return {
-        panelGroups: buildPanelGroupViewModels(summary, panelDisplayModes, panelPercentMode),
+        panelGroups: buildPanelGroupViewModels(summary, panelDisplayModes, panelPercentMode, panelLabelMode),
         panelPercentMode,
+        panelLabelMode,
         services: [
             buildServiceViewModel('codex', 'Codex', codex?.data, codex?.code, now),
             buildServiceViewModel('claude', 'Claude', claude?.data, claude?.code, now),

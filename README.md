@@ -67,16 +67,23 @@ Once enabled, a provider-marked indicator appears in the top panel. Click it to 
 
 ### Panel display modes
 
-Open the popup and use the **Panel display** switches to choose which top-bar values are shown:
+Open the popup and use the **Panel metrics** switches to choose which top-bar values are shown:
 
 | Mode | Description |
 |------|-------------|
-| Claude Session | Claude session value in the panel as `s` |
-| Claude Week | Claude week value in the panel as `w` |
-| Codex Session | Codex session value in the panel as `s` |
-| Codex Week | Codex week value in the panel as `w` |
+| Claude Session | Claude session value in the panel |
+| Claude Week | Claude week value in the panel |
+| Codex Session | Codex session value in the panel |
+| Codex Week | Codex week value in the panel |
 
 You can enable more than one of these at the same time, including all four values.
+
+### Panel label style
+
+Open the **Label style** submenu to choose how the panel names its metrics:
+
+- **Compact**: abbreviated labels (`s`, `w`)
+- **Expanded**: full labels (`Session`, `Week`)
 
 ### Panel percent mode
 
